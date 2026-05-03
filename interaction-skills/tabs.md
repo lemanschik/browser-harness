@@ -4,14 +4,14 @@ Use **CDP for control**, **UI automation for user-visible order**.
 
 ## Pure CDP (portable: macOS / Linux / Windows)
 
-```python
-tabs = list_tabs()                    # includes chrome:// pages too
-real_tabs = list_tabs(include_chrome=False)
-tid = new_tab("https://example.com")  # create + attach
-switch_tab(tid)                       # attach harness to tab
-cdp("Target.activateTarget", targetId=tid)  # show it in Chrome
-print(current_tab())
-print(page_info())
+```javascript
+const tabs = await list_tabs();                    // includes chrome:// pages too
+const real_tabs = await list_tabs({ include_chrome: false });
+const tid = await new_tab("https://example.com");  // create + attach
+await switch_tab(tid);                       // attach harness to tab
+await cdp("Target.activateTarget", { targetId: tid });  // show it in Chrome
+console.log(await current_tab());
+console.log(await page_info());
 ```
 
 What CDP is good at:

@@ -1,0 +1,27 @@
+{
+  "name": "browser-harness",
+  "version": "0.1.0",
+  "description": "Thin CDP harness for browser agents",
+  "type": "module",
+  "main": "src/browser_harness/run.js",
+  "bin": {
+    "browser-harness": "src/browser_harness/run.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node src/browser_harness/daemon.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^22.0.0"
+  },
+  "keywords": [
+    "browser",
+    "cdp",
+    "agent",
+    "automation"
+  ],
+  "author": "Browser Use",
+  "license": "MIT"
+}

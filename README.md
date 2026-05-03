@@ -9,9 +9,9 @@ One websocket to Chrome, nothing between. The agent writes what's missing during
 ```
   ● agent: wants to upload a file
   │
-  ● agent-workspace/agent_helpers.py → helper missing
+  ● agent-workspace/agent_helpers.js → helper missing
   │
-  ● agent writes it                         agent_helpers.py
+  ● agent writes it                         agent_helpers.js
   │                                                       + custom helper
   ✓ file uploaded
 ```
@@ -46,28 +46,21 @@ Stealth, sub-agents, or headless deployment.<br>
 - Grab a key at [cloud.browser-use.com/new-api-key](https://cloud.browser-use.com/new-api-key)
 - Or let the agent sign up itself via [docs.browser-use.com/llms.txt](https://docs.browser-use.com/llms.txt) (setup flow + challenge context included).
 
-## Architecture (~1k lines across 4 core files)
+## Architecture (~2k lines of modern Javascript)
 
-- `install.md` — first-time install and browser bootstrap
-- `SKILL.md` — day-to-day usage
-- `src/browser_harness/` — protected core package
-- `agent-workspace/agent_helpers.py` — helper code the agent edits
+- `src/browser_harness/` — core daemon and connection management
+- `src/browser_use/` — **hard-ported browser-use framework** (Agent, DOM, Controller)
+- `helpers.js` — **Puppeteer-powered** browser control primitives
+- `agent-workspace/agent_helpers.js` — helper code the agent edits
 - `agent-workspace/domain-skills/` — reusable site-specific skills the agent edits
 
-## Contributing
+## Features
 
-PRs and improvements welcome. The best way to help: **contribute a new domain skill** under [agent-workspace/domain-skills/](agent-workspace/domain-skills/) for a site or task you use often (LinkedIn outreach, ordering on Amazon, filing expenses, etc.). Each skill teaches the agent the selectors, flows, and edge cases it would otherwise have to rediscover.
-
-- **Skills are written by the harness, not by you.** Just run your task with the agent — when it figures something non-obvious out, it files the skill itself (see [SKILL.md](SKILL.md)). Please don't hand-author skill files; agent-generated ones reflect what actually works in the browser.
-- Open a PR with the generated `agent-workspace/domain-skills/<site>/` folder — small and focused is great.
-- Bug fixes, docs tweaks, and helper improvements are equally welcome.
-- Browse existing skills (`github/`, `linkedin/`, `amazon/`, ...) to see the shape.
-
-If you're not sure where to start, open an issue and we'll point you somewhere useful.
-
-## Domain skills
-
-Set `BH_DOMAIN_SKILLS=1` to enable [agent-workspace/domain-skills/](agent-workspace/domain-skills/) — community-contributed per-site playbooks `goto_url` surfaces by domain. Contribute via PR.
+- **Puppeteer Backend**: Reliable interaction via the world's most popular automation library.
+- **Autonomous Agent**: Integrated `Agent` loop that observes, thinks, and acts using vision and DOM data.
+- **Smart DOM Extraction**: Extracts only interactive and visible elements to minimize LLM context.
+- **Action Controller**: High-level actions like `search`, `scroll`, and `upload_file`.
+- **Multi-Tab Support**: Manage and switch between multiple browser sessions seamlessly.
 
 ---
 

@@ -8,10 +8,10 @@ That matters for two reasons:
 
 2. **Some LLMs reject images > 2000 px per side.** Long sessions on 2× displays will eventually hit this. Pass `max_dim=1800` to downscale the file before it gets into the conversation:
 
-```python
-capture_screenshot("/tmp/shot.png", max_dim=1800)
+```javascript
+await capture_screenshot("/tmp/shot.png");
 ```
 
-The downscale only happens when the image actually exceeds `max_dim`, so it's safe to leave on for every shot.
+The downscale feature (`max_dim`) and debug overlays are currently not implemented in the JS version to minimize dependencies. If you need them, consider adding an image processing library.
 
-Use full-page screenshots (`full=True`) only when you need to see content below the fold — they are much larger and slower than viewport-only.
+Use full-page screenshots (`full: true`) only when you need to see content below the fold — they are much larger and slower than viewport-only.

@@ -5,7 +5,7 @@ description: Install browser-harness into the current agent and connect it to a 
 
 # `browser-harness` installation
 
-Use this file only for browser-harness install, browser connection setup, and connection troubleshooting. For day-to-day browser work, read `SKILL.md`. Task-specific edits belong in `agent-workspace/agent_helpers.py` and `agent-workspace/domain-skills/`.
+Use this file only for browser-harness install, browser connection setup, and connection troubleshooting. For day-to-day browser work, read `SKILL.md`. Task-specific edits belong in `agent-workspace/agent_helpers.js` and `agent-workspace/domain-skills/`.
 
 ## Recommended `browser-harness` setup
 
@@ -14,11 +14,16 @@ Clone the repo once into a durable location, then install it as an editable tool
 ```bash
 git clone https://github.com/browser-use/browser-harness
 cd browser-harness
-uv tool install -e .
+npm install
+npm install -g .
+# or if using bun:
+# bun install && bun link
 command -v browser-harness
 ```
 
-That keeps the command global while still pointing at the real repo checkout, so when the agent edits `agent-workspace/agent_helpers.py` the next `browser-harness` uses the new code immediately. Prefer a stable path like `~/Developer/browser-harness`, not `/tmp`.
+Installation ensures `puppeteer-core` is available. No extra browser download is required as the harness connects to your existing Chrome instance.
+
+That keeps the command global while still pointing at the real repo checkout, so when the agent edits `agent-workspace/agent_helpers.js` the next `browser-harness` uses the new code immediately. Prefer a stable path like `~/Developer/browser-harness`, not `/tmp`.
 
 ## Make browser-harness global for the current agent
 
@@ -37,7 +42,7 @@ This makes new Codex or Claude Code sessions in other folders load the runtime b
 ## Keeping the harness current
 
 - On each run, `browser-harness` prints `[browser-harness] update available: X -> Y` (once per day) when a newer GitHub release exists.
-- When you see that banner, run `browser-harness --update -y` yourself — don't ask the user. It pulls the new code (`git pull --ff-only` for editable clones, `uv tool upgrade browser-harness` for PyPI installs) and stops the running daemon so the next call picks up the new code. With `-y` it won't prompt.
+- When you see that banner, run `browser-harness --update -y` yourself — don't ask the user. It pulls the new code (`git pull --ff-only` for editable clones, `npm update -g browser-harness` for npm installs) and stops the running daemon so the next call picks up the new code. With `-y` it won't prompt.
 - `--update` refuses to run on an editable clone with uncommitted changes. If that happens, tell the user and let them resolve the dirty worktree.
 
 ## Maintenance commands
@@ -47,7 +52,7 @@ This makes new Codex or Claude Code sessions in other folders load the runtime b
 ## Architecture
 
 ```text
-Chrome / Browser Use cloud -> CDP WS -> browser_harness.daemon -> IPC -> browser_harness.run
+Chrome / Browser Use cloud -> CDP WS -> src/browser_harness/daemon.js -> IPC -> src/browser_harness/run.js
 ```
 
 - Protocol is one JSON line each way.
@@ -67,7 +72,7 @@ This section is the source of truth for how browser-harness connects to a browse
 
 Browser-harness can connect to any Chrome or Chromium-based browser on your computer, or to a Browser Use cloud browser.
 
-**Cloud browsers** are managed by the Browser Use cloud API. Start one in Python with `start_remote_daemon("work", ...)`. Authentication is via the `BROWSER_USE_API_KEY` environment variable; the harness handles the WebSocket URL itself. To carry your local Chrome cookies into a cloud browser, install `profile-use` once (`curl -fsSL https://browser-use.com/profile.sh | sh`), then call `uuid = sync_local_profile("MyChromeProfile")` followed by `start_remote_daemon("work", profileId=uuid)`. Cookies are the only thing synced — not localStorage, not extensions, not history.
+**Cloud browsers** are managed by the Browser Use cloud API. Start one in Javascript with `await start_remote_daemon("work", ...)`. Authentication is via the `BROWSER_USE_API_KEY` environment variable; the harness handles the WebSocket URL itself. To carry your local Chrome cookies into a cloud browser, install `profile-use` once (`curl -fsSL https://browser-use.com/profile.sh | sh`), then call `uuid = await sync_local_profile("MyChromeProfile")` followed by `await start_remote_daemon("work", { profileId: uuid })`. Cookies are the only thing synced — not localStorage, not extensions, not history.
 
 **Local browsers** require remote debugging to be enabled. There are two ways, and they suit different use cases.
 
@@ -93,7 +98,7 @@ If the user hasn't said which connection method to use, default to Way 1 if Chro
 1. Try the harness:
 
    ```bash
-   browser-harness -c 'print(page_info())'
+   browser-harness -c 'console.log(await page_info())'
    ```
 
    If it prints page info, you're done.
@@ -120,7 +125,7 @@ If the user hasn't said which connection method to use, default to Way 1 if Chro
    - **chrome ok, daemon ok, but step 1 still failed** → stale daemon. Restart it:
 
      ```bash
-     browser-harness -c 'restart_daemon()'
+     browser-harness -c 'await restart_daemon()'
      ```
 
      If that hangs, escalate: kill all Chrome and daemon processes, then reopen Chrome and retry. On macOS/Linux, also remove `/tmp/bu-default.sock` and `/tmp/bu-default.pid` if they linger.
@@ -130,4 +135,3 @@ If the user hasn't said which connection method to use, default to Way 1 if Chro
 If Way 1 fails repeatedly or the user's task is unattended, move to Way 2 or a cloud browser per the Browser connection reference (these have no popups).
 
 If you are testing browser connection for the first time, run this demo: open `https://github.com/browser-use/browser-harness` in a new tab and activate it (`switch_tab`) so the user sees the harness has attached. If they are logged into GitHub, ask whether to star the repo for them — only click if they say yes. If they are not logged in, navigate to `https://browser-use.com` instead. Then ask what they want to do next.
-

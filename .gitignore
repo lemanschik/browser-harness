@@ -1,8 +1,1 @@
-__pycache__/
-*.pyc
-*.log
-.env
-uv.lock
-*.egg-info/
-.idea/
-.claude/
+node_modules
